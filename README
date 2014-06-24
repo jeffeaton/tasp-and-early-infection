@@ -1,0 +1,42 @@
+This project provides the computer code for the mathematical model, statistical calibration, and analysis described in the manuscript: Eaton JW, Hallett TB. Why transmission during early-stage HIV infection does not predict the long-term impact of HIV treatment-as-prevention. (submitted)
+
+
+*************
+**  code/  **
+*************
+
+The directory code/ includes code for simulating the model (simprev.cpp, model.cpp, states.cpp), statistical calibration (runimis.cpp, imis.cpp, likelihood.cpp), and R wrapper functions for calling the model from R (rlib.cpp, analysis-functions.R). The mathematical model is implemented in C++. The statistical calibration uses incremental mixture importance sampling (Raftery, Bao. Biometrics, 2010.; http://cran.r-project.org/web/packages/IMIS/index.html), implemented in C and relies on the GNU Scientfic Library (GSL; http://www.gnu.org/software/gsl/). Analyses of model ouptut are conducted in R (http://www.r-project.org/).
+
+Compilation of the code requires linking to the GSL libraries (-lgsl -lgslcblas) and uses OpenMP to parallelise the IMIS algorithm, see 'code/makefile'.
+
+To compile code to call the model from R requires installation of Rtools (http://cran.r-project.org/bin/windows/Rtools/) as well as linkage to the GSL libraries. Then R shared objects using the command
+
+$ R CMD SHLIB -lgsl -lgslcblas rlib.cpp simprev.cpp model.cpp states.cpp
+
+This creates an rlib.so (*nix) or rlib.dll (Windows) shared object library that is loaded by the script 'code/analysis-fuctions.R', which defines wrapper R functions to call the model. 
+
+
+***************
+**  output/  **
+***************
+
+The directory output/ contains PBS job submission scripts and output files for model calibration simulations reported in the manuscript (post.pbs, fixed1.pbs, fixed9.pbs, fixed26.pbs). The accompanying 'release' files additionally includes the output of these job submission: 100,000 resamples from the joint posterior distribution from IMIS (postResample.txt, etc.) and accompanying IMIS diagnostics output (postDiagnostics.txt, etc.). The *Resample.txt files are read into R by the file 'figures/load-posterior-distributions.R' for model analyses. Copy and paste these into the output/ directory in order to replicate model analyses in the figures/ directory.
+
+Model calibration was run on computing resources maintained by the Imperial College High Performance Computing Service (http://www3.imperial.ac.uk/ict/services/hpc). The simulation to estimate the full posterior in the file 'output/post.pbs' is compuationtally intensive: utilising 9 hours and 19GB of memory on a 16-core cluster node.
+
+Running these with a smaller number of initial samples, resamples, and final samples will reduce this, with some loss of robustness for posterior distribution estimation. (For a test case, suggest a small number such as InitSamples = 1e4, StepSamples = 1e3, FinalResamples = 1e3; much larger for a reasonable approximation to the posterior.)
+
+
+****************
+**  figures/  **
+****************
+
+The directory /figures includes R scripts for running model analyses and creating figures reported in the manuscript. Analyses in the manuscript rely on 10000 samples from the posterior distribution and are memory intensive. The number of posterior samples can be downsampled by replacing the '1e4' samples in the file 'output/load-posterior-distribution.R' with a smaller number (e.g. 1e3).
+
+
+****************************************
+
+For questions please contact Jeff Eaton: jeffrey.eaton@imperial.ac.uk.
+
+Created: 15 April 2014
+Edited: 24 June 2014
