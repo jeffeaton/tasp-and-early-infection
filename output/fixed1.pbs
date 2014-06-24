@@ -1,0 +1,11 @@
+#!/bin/sh
+#PBS -l walltime=10:00:00
+#PBS -l select=01:ncpus=16:mem=20gb
+#PBS -j oe
+
+module load intel-suite
+module load gsl/1.16
+
+$HOME/code/runimis-fixed-relinfect 5e7 1e5 1e5 3000 3770004185 $WORK/output/fixed1 1.00
+
+qstat -f $PBS_JOBID
